@@ -12,11 +12,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import com.example.geoQuiz.ui.theme.TestTheme
@@ -28,12 +35,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             TestTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GeoQuiz(
-                        question = "Bern is the capital of Sweden",
-                        right = true,
-                        modifier = Modifier.padding(innerPadding),
-                        context = LocalContext.current
+                    val questions = listOf(
+                        Question("Bern is the capital of Sweden", true),
+                        Question("The Earth revolves around the Sun", true),
+                        Question("Sydney is the capital of Australia", false),
+                        Question("Water boils at 100°C at sea level", true),
+                        Question("The Great Wall of China is visible from space with the naked eye", false),
+                        Question("Mount Everest is the highest mountain on Earth", true),
+                        Question("The Amazon River is the longest river in the world", false),
+                        Question("Paris is the capital of France", true),
+                        Question("The Sahara is the largest desert on Earth", true),
+                        Question("Penguins can fly", false)
                     )
+                    GeoQuiz(questions, Modifier.padding(innerPadding))
                 }
             }
         }
@@ -41,32 +55,67 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun GeoQuiz(
-    question: String,
-    right: Boolean,
-    modifier: Modifier = Modifier,
-    context: Context,
-) {
+fun GeoQuiz(questions: List<Question>, modifier: Modifier){
+    var selectedAnswer by remember { mutableStateOf<Boolean?>(null) }
+
+    var currentIndex by remember { mutableIntStateOf(0) }
+    val question = questions[currentIndex]
+
+    val context = LocalContext.current
     Column(modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
-        Text( text = question, fontSize = 20.sp)
+        Text( text = question.text, fontSize = 20.sp)
         Row {
-            Button(onClick = { onTrueClick(context, right, true) }) {
+            Button(
+                onClick = {
+                    onAnswerClick(context,question.answer , true)
+                    selectedAnswer = true
+            },
+                colors = ButtonDefaults.buttonColors(
+                containerColor = when {
+                    selectedAnswer == null -> Color.Gray
+                    selectedAnswer == true && !question.answer-> Color.Red
+                    selectedAnswer == true && question.answer-> Color.Green
+                    else -> Color.Gray
+                    }
+                )
+            ) {
                 Text( text = "True")
             }
-            Button(onClick = { onTrueClick(context, right, false) }) {
+            Button(
+                onClick = {
+                    onAnswerClick(context,question.answer , false)
+                    selectedAnswer = false
+
+            },
+                colors = ButtonDefaults.buttonColors(
+                containerColor = when {
+                    selectedAnswer == null -> Color.Gray
+                    selectedAnswer == false && question.answer-> Color.Red
+                    selectedAnswer == false && !question.answer-> Color.Green
+                    else -> Color.Gray
+                })
+            ) {
                 Text( text = "False")
             }
 
         }
-        Button(onClick = TODO()) {
-            Text(text = "Next")
+        selectedAnswer?.let {
+            Button(onClick = {
+                if(currentIndex< questions.lastIndex){
+                    currentIndex++
+                } else Toast.makeText(context, "End of Quiz", Toast.LENGTH_LONG).show()
+                selectedAnswer = null
+            }
+            ) {
+                Text(text = "Next")
+            }
         }
     }
 }
 
-private fun onTrueClick(context: Context, right: Boolean, answer: Boolean) {
+private fun onAnswerClick(context: Context, right: Boolean, answer: Boolean) {
     when(answer==right) {
         true -> Toast.makeText(context, "Right", Toast.LENGTH_LONG).show()
         false -> Toast.makeText(context, "Alas", Toast.LENGTH_LONG).show()
