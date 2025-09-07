@@ -9,7 +9,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -25,6 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.geoQuiz.ui.theme.TestTheme
 
@@ -57,7 +63,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GeoQuiz(questions: List<Question>, modifier: Modifier){
     var selectedAnswer by remember { mutableStateOf<Boolean?>(null) }
-
+    val geoRegular = FontFamily(Font(R.font.georegular))
     var currentIndex by remember { mutableIntStateOf(0) }
     val question = questions[currentIndex]
 
@@ -65,7 +71,21 @@ fun GeoQuiz(questions: List<Question>, modifier: Modifier){
     Column(modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center) {
-        Text( text = question.text, fontSize = 20.sp)
+
+        Text(
+            text = "Geo Quiz",
+            fontSize = 30.sp,
+            modifier = Modifier.fillMaxWidth(),
+            fontFamily = geoRegular,
+            textAlign = TextAlign.Center)
+        Spacer(modifier.padding(20.dp))
+        //Question
+        Text(
+            text = question.text,
+            fontSize = 40.sp,
+            modifier = Modifier.fillMaxWidth(),
+            fontFamily = geoRegular,
+            textAlign = TextAlign.Center)
         Row {
             Button(
                 onClick = {
@@ -79,9 +99,10 @@ fun GeoQuiz(questions: List<Question>, modifier: Modifier){
                     selectedAnswer == true && question.answer-> Color.Green
                     else -> Color.Gray
                     }
-                )
+                ),
+                modifier = Modifier.padding(8.dp)
             ) {
-                Text( text = "True")
+                Text( text = "True", fontFamily = geoRegular)
             }
             Button(
                 onClick = {
@@ -95,12 +116,20 @@ fun GeoQuiz(questions: List<Question>, modifier: Modifier){
                     selectedAnswer == false && question.answer-> Color.Red
                     selectedAnswer == false && !question.answer-> Color.Green
                     else -> Color.Gray
-                })
+                }),
+                modifier = Modifier.padding(8.dp)
             ) {
-                Text( text = "False")
+                Text( text = "False", fontFamily = geoRegular)
             }
 
         }
+        // Counter
+        Text(
+            text = "${currentIndex+1}/${questions.size}",
+            fontSize = 24.sp,
+            modifier = modifier.fillMaxWidth(),
+            fontFamily = geoRegular,
+            textAlign = TextAlign.Center)
         selectedAnswer?.let {
             Button(onClick = {
                 if(currentIndex< questions.lastIndex){
@@ -109,7 +138,7 @@ fun GeoQuiz(questions: List<Question>, modifier: Modifier){
                 selectedAnswer = null
             }
             ) {
-                Text(text = "Next")
+                Text(text = "Next", fontFamily = geoRegular)
             }
         }
     }
