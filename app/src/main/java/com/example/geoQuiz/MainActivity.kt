@@ -61,88 +61,124 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun GeoQuiz(questions: List<Question>, modifier: Modifier){
+fun GeoQuiz(questions: List<Question>, modifier: Modifier) {
     var selectedAnswer by remember { mutableStateOf<Boolean?>(null) }
     val geoRegular = FontFamily(Font(R.font.georegular))
     var currentIndex by remember { mutableIntStateOf(0) }
-    val question = questions[currentIndex]
+    var isFinished by remember { mutableStateOf(false) } // 👈 добавляем флаг окончания
 
     val context = LocalContext.current
-    Column(modifier = modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
 
-        Text(
-            text = "Geo Quiz",
-            fontSize = 30.sp,
-            modifier = Modifier.fillMaxWidth(),
-            fontFamily = geoRegular,
-            textAlign = TextAlign.Center)
-        Spacer(modifier.padding(20.dp))
-        //Question
-        Text(
-            text = question.text,
-            fontSize = 40.sp,
-            modifier = Modifier.fillMaxWidth(),
-            fontFamily = geoRegular,
-            textAlign = TextAlign.Center)
-        Row {
-            Button(
-                onClick = {
-                    onAnswerClick(context,question.answer , true)
-                    selectedAnswer = true
-            },
-                colors = ButtonDefaults.buttonColors(
-                containerColor = when {
-                    selectedAnswer == null -> Color.Gray
-                    selectedAnswer == true && !question.answer-> Color.Red
-                    selectedAnswer == true && question.answer-> Color.Green
-                    else -> Color.Gray
-                    }
-                ),
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text( text = "True", fontFamily = geoRegular)
-            }
-            Button(
-                onClick = {
-                    onAnswerClick(context,question.answer , false)
-                    selectedAnswer = false
+    if (isFinished) {
 
-            },
-                colors = ButtonDefaults.buttonColors(
-                containerColor = when {
-                    selectedAnswer == null -> Color.Gray
-                    selectedAnswer == false && question.answer-> Color.Red
-                    selectedAnswer == false && !question.answer-> Color.Green
-                    else -> Color.Gray
-                }),
-                modifier = Modifier.padding(8.dp)
-            ) {
-                Text( text = "False", fontFamily = geoRegular)
-            }
-
-        }
-        // Counter
-        Text(
-            text = "${currentIndex+1}/${questions.size}",
-            fontSize = 24.sp,
-            modifier = modifier.fillMaxWidth(),
-            fontFamily = geoRegular,
-            textAlign = TextAlign.Center)
-        selectedAnswer?.let {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "🎉 Congratulations!\nYou passed Geo Quiz!",
+                fontSize = 30.sp,
+                fontFamily = geoRegular,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
+            Spacer(modifier = Modifier.padding(20.dp))
             Button(onClick = {
-                if(currentIndex< questions.lastIndex){
-                    currentIndex++
-                } else Toast.makeText(context, "End of Quiz", Toast.LENGTH_LONG).show()
+
+                currentIndex = 0
                 selectedAnswer = null
+                isFinished = false
+            }) {
+                Text("Again", fontFamily = geoRegular)
             }
-            ) {
-                Text(text = "Next", fontFamily = geoRegular)
+        }
+    } else {
+        // Questions
+        val question = questions[currentIndex]
+
+        Column(
+            modifier = modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Geo Quiz",
+                fontSize = 30.sp,
+                modifier = Modifier.fillMaxWidth(),
+                fontFamily = geoRegular,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier.padding(20.dp))
+            // Question
+            Text(
+                text = question.text,
+                fontSize = 40.sp,
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                fontFamily = geoRegular,
+                textAlign = TextAlign.Center,
+                lineHeight = 28.sp
+            )
+            Row {
+                Button(
+                    onClick = {
+                        onAnswerClick(context, question.answer, true)
+                        selectedAnswer = true
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = when {
+                            selectedAnswer == null -> Color.Gray
+                            selectedAnswer == true && !question.answer -> Color.Red
+                            selectedAnswer == true && question.answer -> Color.Green
+                            else -> Color.Gray
+                        }
+                    ),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(text = "True", fontFamily = geoRegular)
+                }
+                Button(
+                    onClick = {
+                        onAnswerClick(context, question.answer, false)
+                        selectedAnswer = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = when {
+                            selectedAnswer == null -> Color.Gray
+                            selectedAnswer == false && question.answer -> Color.Red
+                            selectedAnswer == false && !question.answer -> Color.Green
+                            else -> Color.Gray
+                        }
+                    ),
+                    modifier = Modifier.padding(8.dp)
+                ) {
+                    Text(text = "False", fontFamily = geoRegular)
+                }
+            }
+            // Counter
+            Text(
+                text = "${currentIndex + 1}/${questions.size}",
+                fontSize = 24.sp,
+                modifier = modifier.fillMaxWidth(),
+                fontFamily = geoRegular,
+                textAlign = TextAlign.Center
+            )
+            selectedAnswer?.let {
+                Button(onClick = {
+                    if (currentIndex < questions.lastIndex) {
+                        currentIndex++
+                        selectedAnswer = null
+                    } else {
+                        isFinished = true
+                    }
+                }) {
+                    Text(text = "Next", fontFamily = geoRegular)
+                }
             }
         }
     }
 }
+
 
 private fun onAnswerClick(context: Context, right: Boolean, answer: Boolean) {
     when(answer==right) {
